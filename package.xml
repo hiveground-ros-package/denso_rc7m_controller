@@ -1,0 +1,20 @@
+<package>
+  <name>denso_rc7m_controller</name>
+  <version>1.0.0</version>
+  <description>Denso RC7M controller interface.</description>
+  <maintainer email="mahisorn.w@gmail.com">Mahisorn Wongphati</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/hiveground-ros-package/denso_rc7m_controller/wiki</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>Mahisorn Wongphati</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend> 
+  <run_depend>roscpp</run_depend>
+  <build_depend>denso_bcap</build_depend> 
+  <run_depend>denso_bcap</run_depend>  
+
+</package>
