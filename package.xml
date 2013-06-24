@@ -16,5 +16,9 @@
   <run_depend>roscpp</run_depend>
   <build_depend>denso_bcap</build_depend> 
   <run_depend>denso_bcap</run_depend>  
+  <build_depend>hardware_interface</build_depend> 
+  <build_depend>controller_manager</build_depend> 
+  <build_depend>urdf</build_depend>
+  <build_depend>realtime_tools</build_depend>
 
 </package>

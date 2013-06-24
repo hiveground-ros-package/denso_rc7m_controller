@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(denso_rc7m_controller)
 
-find_package(catkin REQUIRED COMPONENTS roscpp denso_bcap hardware_interface controller_manager)
+find_package(catkin REQUIRED COMPONENTS roscpp denso_bcap hardware_interface controller_manager urdf realtime_tools)
 
 # Declare catkin package
 catkin_package(  
