@@ -1,11 +1,19 @@
 <launch>
+    <rosparam>
+        JointStateController:
+            type: joint_state_controller/JointStateController
+            publish_rate: 100
+        Joint1Controller:                
+            type: position_controllers/JointPositionController
+            joint: joint1
+    </rosparam>         
     <param name="robot_description" command="$(find xacro)/xacro.py $(find vp6242_description)/urdf/vp6242.xacro"/>
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
     <node pkg="denso_rc7m_controller" type="denso_rc7m_controller" name="denso_rc7m_controller_node" output="screen">
          <rosparam>
             realtime: true          
             prefix: ""
-            simulate: false
+            simulate: true
             ip: "10.0.0.101"
             port: "5007"                                 
          </rosparam>

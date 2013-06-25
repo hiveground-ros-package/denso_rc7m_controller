@@ -95,12 +95,11 @@ private:
 
   //interface
   hardware_interface::JointStateInterface joint_state_interface_;
-  hardware_interface::PositionJointInterface joint_position_interface_;
+  hardware_interface::PositionJointInterface position_joint_interface_;
   double cmd_[NUM_AXIS];
   double pos_[NUM_AXIS];
   double vel_[NUM_AXIS];
   double eff_[NUM_AXIS];
-  double last_pos_[NUM_AXIS];
   urdf::Joint joint_info_[NUM_AXIS];
   bool motor_on_;
 

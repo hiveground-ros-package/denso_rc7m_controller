@@ -73,7 +73,7 @@ DensoRC7MController::DensoRC7MController(const ros::NodeHandle& nh)
       joint_state_interface_.registerHandle(state_handle);
 
       hardware_interface::JointHandle position_handle(joint_state_interface_.getHandle(ss.str()), &cmd_[i]);
-      joint_position_interface_.registerHandle(position_handle);
+      position_joint_interface_.registerHandle(position_handle);
 
       joint_info_[i] = *joint_info;
       ROS_INFO("Add %s", ss.str().c_str());
@@ -84,9 +84,10 @@ DensoRC7MController::DensoRC7MController(const ros::NodeHandle& nh)
     }
   }
 
-  registerInterface(&joint_state_interface_);
-  registerInterface(&joint_position_interface_);
+  ROS_INFO_STREAM("position_joint_interface: " << position_joint_interface_.getNames().size());
 
+  registerInterface(&joint_state_interface_);
+  registerInterface(&position_joint_interface_);
 
   if (!nh_.getParam("simulate", simulate_))
   {
@@ -114,10 +115,9 @@ bool DensoRC7MController::start()
     {
       cmd_[i] = (joint_info_[i].limits->upper + joint_info_[i].limits->lower) * 0.5;
       pos_[i] = cmd_[i];
-      last_pos_[i] = cmd_[i];
       vel_[i] = 0.0;
       eff_[i] = 0.0;
-      ROS_INFO("Joint%d: %f", i, pos_[i]);
+      ROS_INFO("%s: %f", joint_info_[i].name.c_str(), pos_[i]);
     }
     return true;
   }
@@ -221,10 +221,9 @@ bool DensoRC7MController::start()
   {
     cmd_[i] = (joint_position[i] * M_PI) / 180.0;
     pos_[i] = cmd_[i];
-    last_pos_[i] = cmd_[i];
     vel_[i] = 0.0;
     eff_[i] = 0.0;
-    ROS_INFO("Joint%d: %f", i+1, pos_[i]);
+    ROS_INFO("%s: %f", joint_info_[i].name.c_str(), pos_[i]);
   }
 
   setMotor(true);
@@ -348,8 +347,8 @@ bool DensoRC7MController::write()
   {
     if((cmd_[i] > joint_info_[i].limits->upper) || (cmd_[i] < joint_info_[i].limits->lower))
     {
-      ROS_ERROR_THROTTLE(1.0, "Joint %d out of range  %6.3f %6.3f %6.3f",
-                i, cmd_[i], joint_info_[i].limits->upper, joint_info_[i].limits->lower);
+      ROS_ERROR_THROTTLE(1.0, "%s out of range get: %6.3f, max: %6.3f min: %6.3f",
+                         joint_info_[i].name.c_str(), cmd_[i], joint_info_[i].limits->upper, joint_info_[i].limits->lower);
       if(cmd_[i] > joint_info_[i].limits->upper)
         cmd_[i] = joint_info_[i].limits->upper;
       else
@@ -372,8 +371,6 @@ bool DensoRC7MController::write()
   for (int i = 0; i < NUM_AXIS; i++)
   {
     pos_[i] = (result_degree[i] * M_PI) / 180.0;
-    vel_[i] = (pos_[i] - last_pos_[i]) * 1000;
-    last_pos_[i] = pos_[i];
   }
 
   return true;
@@ -446,8 +443,6 @@ bool DensoRC7MController::setMotor(bool on)
 
 
 
-
-
 void quitRequested(int sig)
 {
   g_quit = true;
@@ -499,6 +494,7 @@ bool init_realtime()
 
 void realtime_thread()
 {
+  ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
 
   if(g_realtime)
@@ -512,7 +508,9 @@ void realtime_thread()
   }
 
   DensoRC7MController rc7m(nh_private);
-  controller_manager::ControllerManager cm(&rc7m, nh_private);
+  controller_manager::ControllerManager cm(&rc7m, nh);
+  cm.loadController("JointStateController");
+  cm.loadController("Joint1Controller");
 
   if(!rc7m.start())
   {
@@ -521,8 +519,8 @@ void realtime_thread()
     return;
   }
 
-  ros::Time last_joint_state_publish_time = ros::Time::now();
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState> realtime_joint_state_pub(nh_private, "/joint_states", 1);
+  //ros::Time last_joint_state_publish_time = ros::Time::now();
+  //realtime_tools::RealtimePublisher<sensor_msgs::JointState> realtime_joint_state_pub(nh_private, "/joint_states", 1);
 
   ros::Rate rate(1000);
   while(!g_quit)
@@ -535,6 +533,7 @@ void realtime_thread()
       break;
     }
 
+    /*
     double dt_joint_state = (ros::Time::now() - last_joint_state_publish_time).toSec();
     if(dt_joint_state > (10 * rate.expectedCycleTime().toSec()))
     {
@@ -546,7 +545,6 @@ void realtime_thread()
         {
           msg.name.push_back(rc7m.getJointInfo(i).name);
           msg.position.push_back(rc7m.getJointPosition(i));
-          msg.velocity.push_back(rc7m.getJointVelocity(i));
         }
 
         realtime_joint_state_pub.msg_ = msg;
@@ -554,6 +552,7 @@ void realtime_thread()
         last_joint_state_publish_time = ros::Time::now();
       }
     }
+    */
     rate.sleep();
   }
 
@@ -583,20 +582,14 @@ int main(int argc, char** argv)
     }
   }
 
-
-
   signal(SIGTERM, quitRequested);
   signal(SIGINT, quitRequested);
   signal(SIGHUP, quitRequested);
-
-
 
   g_realtime_thread = boost::thread(&realtime_thread);
 
   ros::spin();
 
   g_realtime_thread.join();
-
-
   return 0;
 }
