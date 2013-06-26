@@ -510,7 +510,8 @@ void realtime_thread()
   DensoRC7MController rc7m(nh_private);
   controller_manager::ControllerManager cm(&rc7m, nh);
   cm.loadController("JointStateController");
-  cm.loadController("Joint1Controller");
+  cm.loadController(nh_private.getNamespace() + "/Joint1Controller");
+  cm.loadController(nh_private.getNamespace() + "/PTPController");
 
   if(!rc7m.start())
   {

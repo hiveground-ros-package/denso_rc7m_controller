@@ -2,10 +2,7 @@
     <rosparam>
         JointStateController:
             type: joint_state_controller/JointStateController
-            publish_rate: 100
-        Joint1Controller:                
-            type: position_controllers/JointPositionController
-            joint: joint1
+            publish_rate: 100        
     </rosparam>         
     <param name="robot_description" command="$(find xacro)/xacro.py $(find vp6242_description)/urdf/vp6242.xacro"/>
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
@@ -15,7 +12,13 @@
             prefix: ""
             simulate: true
             ip: "10.0.0.101"
-            port: "5007"                                 
+            port: "5007"               
+            Joint1Controller:                
+                type: position_controllers/JointPositionController
+                joint: joint1
+            PTPController:
+                type: hiveground_controllers/PTPFollowJointTrajectoryController
+                joints: [joint1, joint2, joint3, joint4, joint5, joint6]                  
          </rosparam>
     </node> 
 </launch>
