@@ -10,7 +10,7 @@
          <rosparam>
             realtime: true          
             prefix: ""
-            simulate: true
+            simulate: false
             ip: "10.0.0.101"
             port: "5007"               
             Joint1Controller:                

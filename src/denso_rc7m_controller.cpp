@@ -520,10 +520,9 @@ void realtime_thread()
     return;
   }
 
-  //ros::Time last_joint_state_publish_time = ros::Time::now();
-  //realtime_tools::RealtimePublisher<sensor_msgs::JointState> realtime_joint_state_pub(nh_private, "/joint_states", 1);
 
   ros::Rate rate(1000);
+
   while(!g_quit)
   {
     cm.update(ros::Time::now(), rate.expectedCycleTime());
@@ -533,27 +532,6 @@ void realtime_thread()
       g_quit = true;
       break;
     }
-
-    /*
-    double dt_joint_state = (ros::Time::now() - last_joint_state_publish_time).toSec();
-    if(dt_joint_state > (10 * rate.expectedCycleTime().toSec()))
-    {
-      if (realtime_joint_state_pub.trylock())
-      {
-        sensor_msgs::JointState msg;
-        msg.header.stamp = ros::Time::now();
-        for(int i = 0; i < DensoRC7MController::NUM_AXIS; i++)
-        {
-          msg.name.push_back(rc7m.getJointInfo(i).name);
-          msg.position.push_back(rc7m.getJointPosition(i));
-        }
-
-        realtime_joint_state_pub.msg_ = msg;
-        realtime_joint_state_pub.unlockAndPublish();
-        last_joint_state_publish_time = ros::Time::now();
-      }
-    }
-    */
     rate.sleep();
   }
 
