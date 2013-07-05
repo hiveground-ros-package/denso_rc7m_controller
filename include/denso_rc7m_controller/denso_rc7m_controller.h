@@ -50,7 +50,7 @@ public:
   static const int NUM_AXIS = 6;
 
 public:
-  DensoRC7MController(const ros::NodeHandle& nh);
+  DensoRC7MController();
   virtual ~DensoRC7MController();
 
   bool start();

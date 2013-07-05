@@ -47,8 +47,8 @@ bool g_realtime = false;
 bool g_quit = false;
 
 
-DensoRC7MController::DensoRC7MController(const ros::NodeHandle& nh)
-  : nh_(nh),
+DensoRC7MController::DensoRC7MController()
+  : nh_("~"),
     simulate_(true),
     motor_on_(false),
     slave_mode_(0x102) //Joint ASYNC @ 1kHz
@@ -58,7 +58,7 @@ DensoRC7MController::DensoRC7MController(const ros::NodeHandle& nh)
   ROS_INFO_STREAM(urdf_.getName());
 
   //get joint prefix
-  nh.getParam("prefix", prefix_);
+  nh_.getParam("prefix", prefix_);
   ROS_INFO_STREAM("prefix: " << prefix_);
 
   //add joints
@@ -507,11 +507,8 @@ void realtime_thread()
     }
   }
 
-  DensoRC7MController rc7m(nh_private);
+  DensoRC7MController rc7m;
   controller_manager::ControllerManager cm(&rc7m, nh);
-  cm.loadController("JointStateController");
-  cm.loadController(nh_private.getNamespace() + "/Joint1Controller");
-  cm.loadController(nh_private.getNamespace() + "/PTPController");
 
   if(!rc7m.start())
   {
